@@ -25,10 +25,11 @@ void RenderData::RegisterObject(Context *context)
 }
 
 
+
 void RenderData::SetRenderPathOnViewport(Viewport* vp)
 {
+    auto cache = GetSubsystem<ResourceCache>();
     RenderPath* rp = new RenderPath();
-    auto cache = context_->GetSubsystem<ResourceCache>();
     rp->Load(cache->GetResource<XMLFile>(mRenderPath));
 
     if (!rp){
