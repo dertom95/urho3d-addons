@@ -1,0 +1,17 @@
+.template 0
+if defined(switches.arg1)
+  folder=switches.arg1
+endif
+
+echo "folder $(components.folder:)"
+folder = switches.arg1
+echo "args-amount $(switches.arg1)"
+output_folder = ""
+if defined(switches.arg2)
+  output_folder = switches.arg2
+  echo "output-folder:$(output_folder:)"
+endif
+
+gsl from "$(components.folder:)/urho3d-components-header.gsl"
+gsl from "$(components.folder:)/urho3d-components-body.gsl"
+.endtemplate

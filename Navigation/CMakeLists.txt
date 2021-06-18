@@ -5,3 +5,7 @@ project (Navigation)
 source_group("Source" ${PROJECT_SOURCE_DIR})
 
 add_library(Navigation GameNavigation.h GameNavigation.cpp)
+
+list(APPEND LIBS Navigation)
+
+set(LIBS ${LIBS} PARENT_SCOPE)
