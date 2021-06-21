@@ -177,7 +177,7 @@ private:
     InternalData* data;
 .endif
 
-. for method where !defined(visibility)|visibility="private"
+. for method where visibility?="private"
 .  if first()
 private:
 .  endif
@@ -193,7 +193,7 @@ protected:
     $(get_method_signature_with_decorators(method));        
 . endfor
 
-. for method where visibility?="public"
+. for method where !defined(visibility)|visibility?="public"
 .  if first()
 public:
 .  endif

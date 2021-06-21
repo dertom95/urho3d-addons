@@ -68,11 +68,11 @@ void register_components(Context* ctx){
 }
 
 .# ---------------- GENERATE IMPL-FILES ----------------------------------------------------------------
-.if !defined(directory.open("impl"))
+.if !defined(directory.open("$(output_folder:)impl"))
 . directory.create("$(output_folder:)impl")
 .endif
 .for component
-. if !file.exists("impl/$(component.name:).cpp") | defined(switches.overwrite)
+. if !file.exists("$(output_folder:)impl/$(component.name:).cpp") | defined(switches.overwrite)
 .output "$(output_folder:)impl/$(component.name:).cpp"
 #include "../Generated/gen-comps.h"
 
