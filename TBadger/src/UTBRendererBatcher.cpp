@@ -123,8 +123,9 @@ void UTBRendererBatcher::OnResizeWin(int _iwidth, int _iheight)
 
 //=============================================================================
 //=============================================================================
-void UTBRendererBatcher::Init(const String &_strDataPath)
+void UTBRendererBatcher::Init(const String &_strDataPath, const String& overrideSkin)
 {
+    UpdateDPI();
     // register with UI
     GetSubsystem<UI>()->GetRoot()->AddChild( this );
 
@@ -135,7 +136,7 @@ void UTBRendererBatcher::Init(const String &_strDataPath)
     tb_core_init( this );
 
     // load resources
-    LoadDefaultResources();
+    LoadDefaultResources(overrideSkin.CString());
 
     // map keys
     CreateKeyMap();
@@ -146,12 +147,12 @@ void UTBRendererBatcher::Init(const String &_strDataPath)
 
 //=============================================================================
 //=============================================================================
-void UTBRendererBatcher::LoadDefaultResources()
+void UTBRendererBatcher::LoadDefaultResources(const char* overrideFile)
 {
     g_tb_lng->Load("resources/language/lng_en.tb.txt");
 
     // Load the default skin, and override skin that contains the graphics specific to the demo.
-    g_tb_skin->Load("resources/default_skin/skin.tb.txt", "demo01/skin/skin.tb.txt");
+    g_tb_skin->Load("resources/default_skin/skin.tb.txt", overrideFile);
 
     // **README**
     // - define TB_FONT_RENDERER_FREETYPE in tb_config.h for non-demo
@@ -172,6 +173,11 @@ void UTBRendererBatcher::LoadDefaultResources()
 #if defined(TB_FONT_RENDERER_STB) || defined(TB_FONT_RENDERER_FREETYPE)
     g_font_manager->AddFontInfo("resources/vera.ttf", "Vera");
 #endif
+
+    for (auto font : customFonts){
+        AddFont(font.first_,font.second_);
+    }
+
 #ifdef TB_FONT_RENDERER_TBBF
     g_font_manager->AddFontInfo("resources/default_font/segoe_white_with_shadow.tb.txt", "Segoe");
     g_font_manager->AddFontInfo("fonts/neon.tb.txt", "Neon");
@@ -202,6 +208,18 @@ void UTBRendererBatcher::LoadDefaultResources()
     root_.SetSkinBg(TBIDC("background"));
 
     TBWidgetsAnimationManager::Init();
+}
+
+void UTBRendererBatcher::AddFont(const String &fontname, const String &filename)
+{
+#if defined(TB_FONT_RENDERER_STB) || defined(TB_FONT_RENDERER_FREETYPE)
+    if (g_font_manager){
+        g_font_manager->AddFontInfo(filename.CString(), fontname.CString());
+        return;
+    } else {
+        customFonts[fontname]=filename;
+    }
+#endif
 }
 
 //=============================================================================
@@ -415,6 +433,7 @@ void UTBRendererBatcher::RegisterHandlers()
 
     // screen resize and renderer
     SubscribeToEvent(E_SCREENMODE, URHO3D_HANDLER(UTBRendererBatcher, HandleScreenMode));
+    SubscribeToEvent(E_WINDOWPOS, URHO3D_HANDLER(UTBRendererBatcher, HandleWindowPos));
     SubscribeToEvent(E_BEGINFRAME, URHO3D_HANDLER(UTBRendererBatcher, HandleBeginFrame));
     SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(UTBRendererBatcher, HandlePostUpdate));
     SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(UTBRendererBatcher, HandlePostRenderUpdate));
@@ -449,6 +468,7 @@ void UTBRendererBatcher::HandleScreenMode(StringHash eventType, VariantMap& even
     using namespace ScreenMode;
 
     OnResizeWin( eventData[P_WIDTH].GetInt(), eventData[P_HEIGHT].GetInt() );
+    UpdateDPI();
 }
 
 //=============================================================================
@@ -588,6 +608,13 @@ void UTBRendererBatcher::HandleTextInput(StringHash eventType, VariantMap& event
     root_.InvokeKey( key, TB_KEY_UNDEFINED, modKey, true );
 }
 
+void UTBRendererBatcher::HandleWindowPos(StringHash eventType, VariantMap &eventData)
+{
+    using namespace WindowPos;
+
+    UpdateDPI();
+}
+
 //=============================================================================
 // TB special and quality keys func
 //=============================================================================
@@ -602,6 +629,15 @@ int UTBRendererBatcher::FindTBKey(int _ikey)
     }
 
     return itbkey;
+}
+
+void UTBRendererBatcher::UpdateDPI()
+{
+    auto graphics = GetSubsystem<Graphics>();
+    int monitor = graphics->GetCurrentMonitor();
+    auto dpis = graphics->GetDisplayDPI(monitor);
+    TBSystem::SetDPI((int)dpis.x_);
+    URHO3D_LOGINFOF("NEW DPI:%i",TBSystem::GetDPI());
 }
 
 //=============================================================================

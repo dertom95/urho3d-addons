@@ -9,6 +9,7 @@
 
 #include <sys/time.h>
 #include <stdio.h>
+#include <Urho3D/Graphics/Graphics.h>
 
 #ifdef TB_RUNTIME_DEBUG_INFO
 
@@ -51,10 +52,17 @@ int TBSystem::GetPixelsPerLine()
 	return 40 * GetDPI() / 96;
 }
 
+int TB_DPI = 96;
+void TBSystem::SetDPI(int dpi)
+{
+    TB_DPI = dpi;
+}
+
 int TBSystem::GetDPI()
 {
+
 	// FIX: Implement!
-    return 96;
+    return TB_DPI;
 }
 
 }; // namespace tb

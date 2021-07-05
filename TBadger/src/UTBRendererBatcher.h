@@ -89,9 +89,9 @@ public:
     static UTBRendererBatcher& Singleton() { return *pSingleton_; }
 
     // methods
-    void Init(const String &_strDataPath);
-    void LoadDefaultResources();
-
+    void Init(const String &_strDataPath,const String& overrideSkin="demo01/skin/skin.tb.txt");
+    void LoadDefaultResources(const char* overrideFile="demo01/skin/skin.tb.txt");
+    void AddFont(const String& fontname,const String& filename);
     TBWidget& Root() { return root_; }
     const String& GetDataPath() { return strDataPath_; }
 
@@ -112,6 +112,7 @@ public:
         m_clip_rect = rect;
     }
 
+    void UpdateDPI();
 protected:
     // override methods
     virtual void AddQuadInternal(const TBRect &dst_rect, const TBRect &src_rect, uint32 color, TBBitmap *bitmap, TBBitmapFragment *fragment);
@@ -128,6 +129,7 @@ protected:
 
     // renderer
     void HandleScreenMode(StringHash eventType, VariantMap& eventData);
+    void HandleWindowPos(StringHash eventType, VariantMap& eventData);
     void HandleBeginFrame(StringHash eventType, VariantMap& eventData);
     void HandlePostUpdate(StringHash eventType, VariantMap& eventData);
     void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
@@ -155,5 +157,6 @@ protected:
 
     HashMap<int, int>   uKeytoTBkeyMap;
     IntVector2          lastMousePos_;
+    HashMap<String,String> customFonts;
 };
 

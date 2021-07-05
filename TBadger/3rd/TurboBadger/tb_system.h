@@ -46,7 +46,9 @@ public:
 	static int GetPixelsPerLine();
 
 	/** Get Dots Per Inch for the main screen. */
-	static int GetDPI();
+    static int GetDPI();
+
+    static void SetDPI(int dpi);
 };
 
 /** TBClipboard is a porting interface for the clipboard. */
