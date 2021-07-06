@@ -174,7 +174,7 @@ private:
 .if defined(component.internaldata) & component.internaldata="true"
     struct InternalData;
     
-    InternalData* data;
+    InternalData* data=nullptr;
 .endif
 
 . for method where visibility?="private"
