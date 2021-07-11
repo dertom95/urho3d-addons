@@ -112,6 +112,8 @@ public:
         m_clip_rect = rect;
     }
 
+    void ReloadSkin();
+
     void UpdateDPI();
 protected:
     // override methods
@@ -154,6 +156,8 @@ protected:
     PODVector<UIBatch>  batches_;
 
     String              strDataPath_;
+
+    String skin1,skin2;
 
     HashMap<int, int>   uKeytoTBkeyMap;
     IntVector2          lastMousePos_;

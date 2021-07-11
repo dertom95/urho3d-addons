@@ -737,6 +737,9 @@ TBMover::TBMover()
 
 bool TBMover::OnEvent(const TBWidgetEvent &ev)
 {
+	if (!m_active) 
+		return false;
+
 	TBWidget *target = GetParent();
 	if (!target)
 		return false;
@@ -775,6 +778,9 @@ WIDGET_HIT_STATUS TBResizer::GetHitStatus(int x, int y)
 
 bool TBResizer::OnEvent(const TBWidgetEvent &ev)
 {
+	if (!m_active) 
+		return false;
+		
 	TBWidget *target = GetParent();
 	if (!target)
 		return false;

@@ -152,7 +152,9 @@ void UTBRendererBatcher::LoadDefaultResources(const char* overrideFile)
     g_tb_lng->Load("resources/language/lng_en.tb.txt");
 
     // Load the default skin, and override skin that contains the graphics specific to the demo.
-    g_tb_skin->Load("resources/default_skin/skin.tb.txt", overrideFile);
+    skin1 = "resources/default_skin/skin.tb.txt";
+    skin2 = overrideFile;
+    g_tb_skin->Load(skin1.CString(),skin2.CString());
 
     // **README**
     // - define TB_FONT_RENDERER_FREETYPE in tb_config.h for non-demo
@@ -220,6 +222,11 @@ void UTBRendererBatcher::AddFont(const String &fontname, const String &filename)
         customFonts[fontname]=filename;
     }
 #endif
+}
+
+void UTBRendererBatcher::ReloadSkin()
+{
+    g_tb_skin->Load(skin1.CString(),skin2.CString());
 }
 
 //=============================================================================

@@ -400,6 +400,10 @@ public:
 	TBMover();
 
 	virtual bool OnEvent(const TBWidgetEvent &ev);
+	inline bool IsActive() {return m_active;}
+	inline void SetActive(bool active) { m_active=active;}
+protected:
+	bool m_active=true;	
 };
 
 /** TBResizer is a lower right corner resize grip. It will resize its parent widget. */
@@ -412,6 +416,13 @@ public:
 	TBResizer();
 	virtual WIDGET_HIT_STATUS GetHitStatus(int x, int y);
 	virtual bool OnEvent(const TBWidgetEvent &ev);
+	
+	// for some reason I got strange gray shaded windows when removing the resizer!?
+	// hackyhacky-alarm
+	inline bool IsActive() {return m_active;}
+	inline void SetActive(bool active) { m_active=active;}
+protected:
+	bool m_active=true;		
 };
 
 /** TBDimmer dim widgets in the background and block input. */
