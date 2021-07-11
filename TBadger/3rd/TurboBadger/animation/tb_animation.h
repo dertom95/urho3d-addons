@@ -6,8 +6,9 @@
 #ifndef TB_ANIMATION_H
 #define TB_ANIMATION_H
 
-#include "tb_linklist.h"
-#include "tb_object.h"
+#include "../tb_linklist.h"
+#include "../tb_object.h"
+#include <functional>
 
 namespace tb {
 
@@ -65,6 +66,54 @@ public:
 	/** Called after the animation object handled its own OnAnimationStart.
 		See TBAnimationObject::OnAnimationStop for details. */
 	virtual void OnAnimationStop(TBAnimationObject *obj, bool aborted) = 0;
+};
+
+
+
+enum TBLabmdaCallbackEvent {
+    ce_start,ce_progress,ce_abort,ce_finished
+};
+
+typedef std::function<void(float,TBLabmdaCallbackEvent,TBAnimationObject*)> TBAnimationLambdaCallback;
+
+class TBAnimationLambdaListener : public TBAnimationListener
+{
+     TBAnimationLambdaCallback m_callback;
+     bool m_deleteOnStop;
+
+public:
+    TBAnimationLambdaListener(TBAnimationLambdaCallback _callback, bool deleteOnStop=true)
+        : m_callback(_callback)
+        , m_deleteOnStop(deleteOnStop)
+    {};
+
+    /** Called after the animation object handled its own OnAnimationStart.
+        See TBAnimationObject::OnAnimationStart for details. */
+    void OnAnimationStart(TBAnimationObject *obj) override
+    {
+        m_callback(0,ce_start,obj);
+    }
+
+    /** Called after the animation object handled its own OnAnimationStart.
+        See TBAnimationObject::OnAnimationUpdate for details. */
+    void OnAnimationUpdate(TBAnimationObject *obj, float progress) override
+    {
+        m_callback(progress,ce_progress,obj);
+    }
+
+    /** Called after the animation object handled its own OnAnimationStart.
+        See TBAnimationObject::OnAnimationStop for details. */
+    void OnAnimationStop(TBAnimationObject *obj, bool aborted) override
+    {
+        if (aborted){
+            m_callback(1.0f,ce_abort,obj);
+        } else {
+            m_callback(1.0f,ce_finished,obj);
+        }
+        if (m_deleteOnStop){
+            delete this; // wow,... <-- is this allowed?
+        }
+    }
 };
 
 /** TBAnimationObject - Base class for all animated object */

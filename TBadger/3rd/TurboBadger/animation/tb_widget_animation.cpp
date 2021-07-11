@@ -157,24 +157,44 @@ void TBWidgetsAnimationManager::AbortAnimations(TBWidget *widget)
 	AbortAnimations(widget, nullptr);
 }
 
+TBWidgetAnimationObject* TBWidgetsAnimationManager::FindWidgetAnimation(TBWidget *widget, TB_TYPE_ID type_id)
+{
+    TBLinkListOf<TBWidgetAnimationObject>::Iterator iter = widget_animations.IterateForward();
+    while (TBWidgetAnimationObject *wao = iter.GetAndStep())
+    {
+        if (wao->m_widget == widget)
+        {
+            // Skip this animation if we asked for a specific (and
+            // different) animation type.
+            if (type_id != nullptr && !wao->IsOfTypeId(type_id))
+                continue;
+
+            return wao;
+        }
+    }
+    return nullptr;
+}
+
+
 void TBWidgetsAnimationManager::AbortAnimations(TBWidget *widget, TB_TYPE_ID type_id)
 {
-	TBLinkListOf<TBWidgetAnimationObject>::Iterator iter = widget_animations.IterateForward();
-	while (TBWidgetAnimationObject *wao = iter.GetAndStep())
-	{
-		if (wao->m_widget == widget)
-		{
-			// Skip this animation if we asked for a specific (and
-			// different) animation type.
-			if (type_id != nullptr && !wao->IsOfTypeId(type_id))
-				continue;
+    TBLinkListOf<TBWidgetAnimationObject>::Iterator iter = widget_animations.IterateForward();
+    while (TBWidgetAnimationObject *wao = iter.GetAndStep())
+    {
+        if (wao->m_widget == widget)
+        {
+            // Skip this animation if we asked for a specific (and
+            // different) animation type.
+            if (type_id != nullptr && !wao->IsOfTypeId(type_id))
+                continue;
 
-			// Abort the animation. This will both autoremove itself
-			// and delete it, so no need to do it here.
-			TBAnimationManager::AbortAnimation(wao, true);
-		}
-	}
+            // Abort the animation. This will both autoremove itself
+            // and delete it, so no need to do it here.
+            TBAnimationManager::AbortAnimation(wao, true);
+        }
+    }
 }
+
 
 void TBWidgetsAnimationManager::OnWidgetDelete(TBWidget *widget)
 {
