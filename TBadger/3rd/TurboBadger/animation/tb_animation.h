@@ -74,7 +74,7 @@ enum TBLabmdaCallbackEvent {
     ce_start,ce_progress,ce_abort,ce_finished
 };
 
-typedef std::function<void(float,TBLabmdaCallbackEvent,TBAnimationObject*)> TBAnimationLambdaCallback;
+typedef std::function<void(float,TBLabmdaCallbackEvent,TBAnimationObject*,TBWidget*)> TBAnimationLambdaCallback;
 
 class TBAnimationLambdaListener : public TBAnimationListener
 {
@@ -82,23 +82,24 @@ class TBAnimationLambdaListener : public TBAnimationListener
      bool m_deleteOnStop;
 
 public:
-    TBAnimationLambdaListener(TBAnimationLambdaCallback _callback, bool deleteOnStop=true)
+    TBAnimationLambdaListener(TBAnimationLambdaCallback _callback, TBWidget* widget=nullptr, bool deleteOnStop=true)
         : m_callback(_callback)
         , m_deleteOnStop(deleteOnStop)
+        , m_widget(widget)
     {};
 
     /** Called after the animation object handled its own OnAnimationStart.
         See TBAnimationObject::OnAnimationStart for details. */
     void OnAnimationStart(TBAnimationObject *obj) override
     {
-        m_callback(0,ce_start,obj);
+        m_callback(0,ce_start,obj,m_widget);
     }
 
     /** Called after the animation object handled its own OnAnimationStart.
         See TBAnimationObject::OnAnimationUpdate for details. */
     void OnAnimationUpdate(TBAnimationObject *obj, float progress) override
     {
-        m_callback(progress,ce_progress,obj);
+        m_callback(progress,ce_progress,obj,m_widget);
     }
 
     /** Called after the animation object handled its own OnAnimationStart.
@@ -106,14 +107,16 @@ public:
     void OnAnimationStop(TBAnimationObject *obj, bool aborted) override
     {
         if (aborted){
-            m_callback(1.0f,ce_abort,obj);
+            m_callback(1.0f,ce_abort,obj,m_widget);
         } else {
-            m_callback(1.0f,ce_finished,obj);
+            m_callback(1.0f,ce_finished,obj,m_widget);
         }
         if (m_deleteOnStop){
             delete this; // wow,... <-- is this allowed?
         }
     }
+private:
+    TBWidget* m_widget=nullptr;
 };
 
 /** TBAnimationObject - Base class for all animated object */
