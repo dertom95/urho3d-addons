@@ -14,4 +14,5 @@ endif
 
 gsl from "$(components.folder:)/urho3d-components-header.gsl"
 gsl from "$(components.folder:)/urho3d-components-body.gsl"
+gsl from "$(components.folder:)/urho3d-components-dotnet.gsl"
 .endtemplate
