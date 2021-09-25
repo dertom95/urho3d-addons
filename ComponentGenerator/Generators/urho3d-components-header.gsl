@@ -28,7 +28,7 @@ function get_type_name(type)
     elsif is_vector(my.type) 
         return "$(my.Type)"
     elsif is_string(my.type)
-        return "$(my.Type)"
+        return "String"
     elsif is_enum(my.type)
         return "$(enum:)"
     elsif is_resource_ref(my.type)
@@ -52,7 +52,7 @@ function get_params(method)
         if !first()
             _params+=","
         endif
-        _params+="$(type:) $(name:)"
+        _params+="$(get_type_name(type):) $(name:)"
     endfor
     return _params
 endfunction

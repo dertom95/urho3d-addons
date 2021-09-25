@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<components folder="." script="Generators/urho3d-components.gsl">
+    <component name="TestComponent" componentType="LogicComponent" category="minimal">
+        <field name="vec3_value" type="vector3" default="1.0f,0.0f,0.0f" visibility="public">
+            Position Indicator Bla    
+        </field>
+
+        <field name="vec2_value" type="vector2" default="1.0f,0.0f" visibility="public"/>
+        <field name="int_value2" type="int" default="1895" visibility="protected"/>
+        <field name="bool_value" type="bool" default="false"/>
+        <field name="float_value" type="float" default="18.95f"/>
+        <field name="string_value" type="string" default="Fortuna!">
+            <getterSetter getter_name="GetStringValue2" setter_name="SetStringValue"/>
+        </field>
+        <field name="string2_value" type="string" default="goal" expose="false"/>
+        <field name="TestType" type="enum" enum="TestEnum" item_prefix="te" default="Pawn">
+            Component Type
+            <getterSetter/>
+            <item name="Tower" value="0"/>
+            <item name="Pawn" />
+            <item name="King" />
+        </field>
+        <field name="IdleAnim" type="resource_ref" ref_type="Animation"/>
+        <field name="Tex" type="resource_ref" ref_type="Texture2D"/>
+        <field name="Model" type="resource_ref" ref_type="Model"/>
+        <field name="TexCube" type="resource_ref" ref_type="TextureCube"/>
+        <field name="Material" type="resource_ref" ref_type="Material"/>
+        <field name="ParticleEffect" type="resource_ref" ref_type="ParticleEffect"/>
+        <field name="Sound" type="resource_ref" ref_type="Sound"/>
+
+
+        <method name="add" return_type="int" virtual="true" visibility="public">
+            Addition of a1+a2. Return the result
+            <parameter name="a1" type="int"/>
+            <parameter name="a2" type="int"/>
+        </method>
+        <method name="DelayedStart" override="true"/>
+        <method name="Update" override="true">
+            <parameter name="dt" type="float"/>
+        </method>
+        <method name="SomeConstMethod" const="true"/>
+    </component>
+
+
+    <component name="Character" category="catch" internaldata="true">
+        <field name="Name" type="string" default=""/>
+        <field name="MaxSpeed" type="float" default="10"/>
+        <field name="CurrentSpeed" type="float" default="0" expose="false"/>
+
+        <field name="State" type="enum" enum="CharacterState" item_prefix="cs" default="Idle">
+            CharacterState
+            <getterSetter/>
+            <item name="Idle" value="0"/>
+            <item name="Walking" />
+            <item name="Running" />
+        </field>
+
+        <field name="IdleAnim" type="resource_ref" ref_type="Animation"/>
+        <field name="WalkAnim" type="resource_ref" ref_type="Animation"/>
+        <field name="RunAnim" type="resource_ref" ref_type="Animation"/>
+        <method name="SetCurrentAnim">
+            <parameter name="animationName" type="String"/>
+            <parameter name="loop" type="bool"/>
+            <parameter name="layer" type="int"/>
+        </method>
+        <method name="GetCurrentAnim" return_type="String"/>
+        <method name="PlayIdle" visibility="protected"/>
+        <method name="PlayWalk" visibility="protected"/>
+        <method name="PlayRun" visibility="protected"/>
+    </component>
+
+    <component name="PathMover" componentType="LogicComponent" category="catch" internaldata="true">
+        <field name="speed" type="float" default="1.0"/>
+        <method name="SetPath">
+            <parameter name="path" type="PODVector<Vector3>"/>
+        </method>
+        <method name="DelayedStart" override="true"/>
+        <method name="Update" override="true">
+            <parameter name="dt" type="float"/>
+        </method>
+
+    </component>
+
+    <component name="TriggerBase" category="catch" expose="false">
+        <field name="OneTime" type="bool" default="false" visibility="public"/>
+        <field name="OnEnter" type="bool" default="false" visibility="public"/>
+        <field name="OnLeave" type="bool" default="false" visibility="public"/>
+        <field name="hits" type="int" default="0" visibility="public" expose="false" />
+        <method name="Trigger" virtual="true" visibility="public"/>
+        <method name="CheckTrigger" return_type="bool" virtual="true" visibility="public">
+            <parameter name="colStart" type="bool"/>
+            <parameter name="colEnd" type="bool"/>
+        </method>
+    </component>
+
+    <component name="TriggerMessage" category="catch" componentType="TriggerBase">
+        <field name="SendMessage" type="string" default=""/>
+        <field name="Payload" type="string" default=""/>
+        <field name="Receiver_OBJ" type="string" default=""/>
+        <method name="Trigger" virtual="true" visibility="public" override="true"/>
+    </component>
+
+
+    <component name="TriggerStandard" category="catch" componentType="TriggerBase">
+        <field name="TriggerType" type="enum" enum="TriggerStandardType" item_prefix="tt" default="powerup">
+            <item name="powerup"/>
+            <item name="death"/>
+            <item name="bonus_life"/>
+            <item name="paralyze"/>
+        </field>
+        <method name="Trigger" virtual="true" visibility="public" override="true"/>
+    </component>
+
+    <component name="TriggerAction" category="catch" componentType="TriggerBase">
+        <field name="ActionTrigger" type="enum" enum="TriggerActionType" item_prefix="at" default="open">
+            <item name="open"/>
+            <item name="close"/>
+            <item name="enable_physics"/>
+        </field>
+        <field name="object_OBJ" type="string" default=""/>
+        <method name="Trigger" virtual="true" visibility="public" override="true"/>
+    </component>
+
+    <component name="LevelData" category="catch">
+      <field name="LevelName" type="string" default="LevelName"/>
+      <field name="MaxPlayerAmount" type="int" default="2"/>
+      <field name="MaxGuysPerClient" type="int" default="1"/>
+      <field name="TestLevel" type="bool" default="false"/>
+      <field name="duration_short" type="float" default="20"/>
+      <field name="duration_medium" type="float" default="40"/>
+      <field name="duration_long" type="float" default="60"/>
+    </component>
+
+    <component name="MatchPlayer" category="catch" internaldata="true">
+        <field name="PlayerNr" type="int"    default="0"/>
+        <field name="Score" type="int"    default="0"/>
+        <field name="Name"  type="string" default="player0"/>
+        <field name="GuysLeft" type="int" default="0"/>
+        <field name="State" type="enum" enum="MatchPlayerState" item_prefix="mps" default="none">
+            <item name="none"/>
+            <item name="joined"/>
+            <item name="ready"/>
+            <item name="playing"/>
+            <item name="lost"/>
+            <item name="won"/>
+        </field>
+    </component>
+
+
+
+<!--        <method name="SetClient">
+            <parameter name="id" type="int"/>
+            <parameter name="client" type="Client*"/>
+        </method>
+
+        <method name="GetClient" return_type="Client*">
+            <parameter name="id" type="int"/>
+        </method>-->
+
+
+    <component name="MatchRuntime" category="catch">
+        <field name="amount_players" type="int" default="2"/>
+        <field name="amount_guys" type="int" default="2"/>
+        <field name="time_left" type="float" default="10"/>
+        <field name="catcher_team_id" type="int" default="0"/>
+        <field name="match_state" type="enum" enum="MatchState" item_prefix="ms" default="waiting">
+            <item name="waiting"/>
+            <item name="running"/>
+            <item name="finished"/>
+        </field>
+    </component>
+
+    <component name="GuyInfo" componentType="LogicComponent" category="catch" internaldata="true">
+        <field name="TeamId" type="int" default="0"/>
+        <field name="GuyId" type="int" default="0"/>
+        <field name="ShowInfo" type="bool" default="false"/>
+        <field name="DecorationType" type="enum" enum="GuyDecoEnum" item_prefix="deco" default="None">
+            Decoration Type
+            <getterSetter/>
+            <item name="None" value="0"/>
+            <item name="TextUI" value="1"/>
+            <item name="3DObject" value="2"/>
+            <item name="Sprite" value="3"/>
+        </field>
+        <method name="DelayedStart" override="true"/>
+        <method name="Update" override="true">
+            <parameter name="dt" type="float"/>
+        </method>
+    </component>
+
+    <component name="SpawnPoint" category="catch">
+        <field name="TeamId" type="int" default="0"/>
+        <field name="InUse" type="bool" default="false" expose="false"/>
+    </component>
+
+</components>
+
