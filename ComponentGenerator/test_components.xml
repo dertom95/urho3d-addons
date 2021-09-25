@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <components folder="." script="Generators/urho3d-components.gsl">
     <component name="TestComponent" componentType="LogicComponent" category="minimal">
-<!--        <field name="vec3_value" type="vector3" default="1.0f,0.0f,0.0f" visibility="public">
+    The Best TestComponent
+        <field name="vec3_value" type="vector3" default="1.0f,0.0f,0.0f" visibility="public">
             Position Indicator Bla    
         </field>
 
@@ -11,8 +12,8 @@
         <field name="float_value" type="float" default="18.95f"/>
         <field name="string_value" type="string" default="Fortuna!">
             <getterSetter getter_name="GetStringValue2" setter_name="SetStringValue"/>
-        </field>
-        <field name="string2_value" type="string" default="goal" expose="false"/>
+        </field> 
+        <!--<field name="string2_value" type="string" default="goal" expose="false"/>
         <field name="TestType" type="enum" enum="TestEnum" item_prefix="te" default="Pawn">
             Component Type
             <getterSetter/>
@@ -41,6 +42,12 @@
         <method name="SomeConstMethod" const="true"/>
         <method name="TestStr">
             <parameter name="st" type="string"/>
+        </method>
+        <method name="GetStr" return_type="string">
+        </method>
+        <method name="GetVec2" return_type="vector2">
+        </method>        
+        <method name="GetBool" return_type="bool">
         </method>
     </component>
 

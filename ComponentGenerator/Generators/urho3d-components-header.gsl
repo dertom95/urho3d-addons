@@ -21,12 +21,17 @@ function is_resource_ref(type)
   return my.type="resource_ref"
 endfunction
 
-function get_type_name(type)
+function get_type_name(type,constvector)
+    my.constvector=my.constvector?"0"
     echo(my.type)
     if is_primitive(my.type)
         return my.type
     elsif is_vector(my.type) 
-        return "$(my.Type)"
+        if my.constvector="0"
+            return "$(my.Type)"
+        else
+            return "const $(my.Type)&"
+        endif
     elsif is_string(my.type)
         return "String"
     elsif is_enum(my.type)
@@ -57,6 +62,14 @@ function get_params(method)
     return _params
 endfunction
 
+function get_return_type(method)
+    if !defined(my.method.return_type)
+        return "void"
+    else
+        return get_type_name(my.method.return_type,"1")
+    endif
+endfunction
+
 function get_const(method)
     _const=""
     if defined(my.method.const) & my.method.const="true"
@@ -74,7 +87,7 @@ function get_method_signature_with_decorators(method)
     if defined(my.method.override) & my.method.override="true"
         _override=" override"
     endif
-    return "$(get_virtual(my.method))$((my.method.return_type?"void"):) $(name:)($(get_params(my.method)))$(_override)$(get_const(my.method))"
+    return "$(get_virtual(my.method))$(get_return_type(my.method):) $(name:)($(get_params(my.method)))$(_override)$(get_const(my.method))"
 endfunction
 
 
@@ -82,11 +95,18 @@ endfunction
 .if !defined(directory.open("Generated"))
 . directory.create("$(output_folder:)Generated")
 .endif
+.if !file.exists("$(output_folder:)/gen-config.h")
+. output "$(output_folder:)/gen-config.h"
+.template 1
+#include <Urho3D/Urho3DAll.h>
+//#include "../DotNet/AllUrho.h"
+.endtemplate
+.endif
 .output "$(output_folder:)Generated/gen-comps.h"
 .template 1
 #pragma once
 
-#include <Urho3D/Urho3DAll.h>
+#include "../gen-config.h"
 
 .for component
 . if !defined(componentType)

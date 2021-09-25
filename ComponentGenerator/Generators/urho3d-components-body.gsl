@@ -4,7 +4,9 @@
 
 #include "gen-comps.h"
 
+#ifdef COMPONENTEXPORTER
 #include <ComponentExporter/ComponentExporter.h>
+#endif
 
 .#--------------------- ENUM-NAMES -----------------------------------
 .for component
@@ -58,13 +60,14 @@ void register_components(Context* ctx){
 .endfor # component    
 
 .# ---------------- NODE Exporter ----------------------------- (TODO: generate json with GSL?)
+#ifdef COMPONENTEXPORTER
     auto exporter = ctx->GetSubsystem<Urho3DNodeTreeExporter>();
     if (exporter){
 .for component where !defined(component.expose) | component.expose="true"
         exporter->AddComponentHashToFilterList($(name:)::GetTypeStatic());
 .endfor # component    
     }
-
+#endif
 }
 
 .# ---------------- GENERATE IMPL-FILES ----------------------------------------------------------------
@@ -94,7 +97,7 @@ $(name:)::~$(name:)(){}
 .endif    
 
 .  for method
-$((method.return_type?"void"):) $(component.name:)::$(method.name:)($(get_params(method)))$(get_const(method))
+$(get_return_type(method):) $(component.name:)::$(method.name:)($(get_params(method)))$(get_const(method))
 .    if defined(method.is_getter)
 {
     return $(method.field_name:);

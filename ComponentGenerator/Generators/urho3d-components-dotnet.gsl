@@ -21,20 +21,53 @@ function is_resource_ref(type)
   return my.type="resource_ref"
 endfunction
 
-function get_type_name(type)
-    echo(my.type)
-    if is_primitive(my.type)
+function get_type_name(type,cstring)
+    my.cstring=my.cstring?"1"
+
+    if !defined(my.type)
+        return "void"
+    elsif is_primitive(my.type)
         return my.type
     elsif is_vector(my.type) 
         return "$(my.Type)"
     elsif is_string(my.type)
-        return "const char*"
+        if my.cstring="1"
+            return "const char*"
+        else
+            return "string"
+        endif
     elsif is_enum(my.type)
         return "$(enum:)"
     elsif is_resource_ref(my.type)
         return "ResourceRef"
     else 
         abort("Unknown type:'$(type)'  Line:$(line)")
+    endif
+endfunction
+
+function get_return_type(method)
+    if !defined(my.method.return_type)
+        return "void"
+    else
+        return get_type_name(my.method.return_type,"0")
+    endif
+endfunction
+
+function get_native_type(type)
+    if !defined(my.type)
+        return "void"
+    elsif is_string(my.type)
+        return "IntPtr"
+    else
+        return get_type_name(my.type)
+    endif
+endfunction
+
+function get_native_return_type(method)
+    if !defined(my.method.return_type)
+        return "void"
+    else
+        return get_native_type(my.method.return_type)
     endif
 endfunction
 
@@ -46,11 +79,15 @@ function get_virtual(method)
     endif
 endfunction
 
-function get_params(method)
+function get_params(method,firstcheck,cstring)
+    my.firstcheck=my.firstcheck?"0"
+    echo "firstcheck:$(my.firstcheck)"
     _params=""
     for my.method.parameter
-         _params+=","
-        _params+="$(get_type_name(type):) $(name:)"
+        if !first() | my.firstcheck="0"
+            _params+=","
+        endif
+        _params+="$(get_type_name(type,my.cstring):) $(name:)"
     endfor
     return _params
 endfunction
@@ -63,33 +100,72 @@ function get_const(method)
     return _const    
 endfunction
 
-function get_target_params(method)
+function get_target_params(method,firstcheck,wrapstring)
     _params=""
+    my.wrapstring=my.wrapstring?"1"
+    my.firstcheck=my.firstcheck?"0"
     for my.method.parameter
-        if !first()
-         _params+=","
+        if !first() | my.firstcheck="0"
+        _params+=","
         endif
-        if is_string(type)
-          _params+="Urho3D::String($(name:))"
+        if is_string(type) & my.wrapstring="1"
+            _params+="Urho3D::String($(name:))"
         else
-          _params+="$(name:)"
+            _params+="$(name:)"
         endif         
     endfor
     return _params
 endfunction
 
-function get_wrapper_return_type(method)
-    if defined(my.method.return_type)
-        if is_string(my.method.return_type)
+function get_field_setter_parameter(field)
+    return "$(get_type_name(field.type):) $(field.name)"
+endfunction
+
+function get_wrapper_type(type)
+    if defined(my.type)
+        if my.type="bool"
+            return "int"
+        elsif is_string(my.type)
             return "const char* "
+        elsif is_vector(my.type)
+            return "Interop::$(get_type_name(my.type))"
         else
-            return get_type_name(my.method.return_type)
+            return get_type_name(my.type)
         endif
     else
         return "void"
     endif
 endfunction
 
+
+function get_wrapper_return_cast(type, innercall)
+    if is_string(my.type)
+        return "stringdup($(my.innercall:).CString())"
+    elsif is_vector(my.type)
+        return "*((Interop::$(get_type_name(my.type))  *) &( $(my.innercall:) ))"
+    else
+        return "$(my.innercall:)"
+    endif
+#    return "$(my.innercall:)"
+endfunction
+
+function get_wrapper_return_type(method)
+    if defined(my.method.return_type)
+        return get_wrapper_type(my.method.return_type)
+    else
+        return "void"
+    endif
+endfunction
+
+function dotnet_get_component_type(comp_type)
+    if !defined(my.comp_type)
+        return "Component2"
+    elsif my.comp_type="Object"
+        return "UrhoObject"
+    else
+        return "$(my.comp_type:)"
+    endif
+endfunction
 
 function get_tag_text(tag)
     return "$(string.trim (my.tag.?''):no,left)"
@@ -100,8 +176,7 @@ endfunction
 .template 1
 
 #include "../DotNet/AllUrho.h"
-#include "ComponentExporter.h"
-
+#include "gen-comps.h"
 #include "../DotNet/interop.h"
 using namespace Urho3D;
 extern "C" {
@@ -191,17 +266,182 @@ $(name:)_$(name:) (Urho3D::Context * context)
 DllExport
 $(get_wrapper_return_type(method)) $(component.name:)_$(name:)($(component.name:)* target $(get_params(method))){
 .  if defined(method.return_type)
-    return target->$(name:)($(get_target_params(method)));
+.   method.inner = "target->$(name:)($(get_target_params(method,"1"):))"
+.   echo "Inner $(inner:)"
+.   result = get_wrapper_return_cast(method.return_type,"$(method.inner:)")
+    return $(result:);
 .  else
-    target->$(name:)($(get_target_params(method)));
+    target->$(name:)($(get_target_params(method,"1")));
 .  endif
 }
-. endfor
+. endfor # method
+//fields
+. for field where visibility?="public"
+    // $(get_tag_text(field))
+DllExport
+$(get_wrapper_type(type)) $(component.name:)_GET_$(name:)($(component.name:)* target){
+.   field.inner = "target->$(name:)"
+.   result = get_wrapper_return_cast(type,"$(field.inner:)")
+    return $(result:);
+}
 
+DllExport
+void $(component.name:)_SET_$(name:)($(component.name:)* target, $(get_type_name(type)) $(name:)){
+    target->$(name:)=$(name:);
+}
 
-.endfor
+. endfor # field
+
+.endfor # component
 }
 
 
 
 .endtemplate
+
+.# ------ dotnet cs-wrapper ----
+
+.# create dotnet-folder
+.if !defined(directory.open("Generated/DotNet"))
+. directory.create("$(output_folder:)Generated/DotNet")
+.endif
+
+.for component
+.output "$(output_folder:)Generated/DotNet/$(name:).cs"
+.template 1
+// WARNING - AUTOGENERATED - DO NOT EDIT
+// 
+// Log.cs
+// 
+using System;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using Urho.Urho2D;
+using Urho.Gui;
+using Urho.Resources;
+using Urho.IO;
+using Urho.Navigation;
+using Urho.Network;
+
+namespace Urho.Custom
+{
+ 
+	/// <summary>
+	/// $(get_tag_text(component))
+	/// </summary>
+	public unsafe partial class $(name:) : $(dotnet_get_component_type(componentType):)
+    {
+		unsafe partial void On$(name:)Created ();
+
+		[Preserve]
+		public $(name:) (IntPtr handle) : base (handle)
+		{
+			On$(name:)Created ();
+		}
+
+		[Preserve]
+		protected $(name:) (UrhoObjectFlag emptyFlag) : base (emptyFlag)
+		{
+			On$(name:)Created ();
+		}
+
+		[DllImport (Consts.NativeImport, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern int $(name:)_GetType (IntPtr handle);
+
+		private StringHash UrhoGetType ()
+		{
+			Runtime.ValidateRefCounted (this);
+			return new StringHash ($(name:)_GetType (handle));
+		}
+
+		[DllImport (Consts.NativeImport, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern IntPtr $(name:)_GetTypeName (IntPtr handle);
+
+		private string GetTypeName ()
+		{
+			Runtime.ValidateRefCounted (this);
+			return Marshal.PtrToStringAnsi ($(name:)_GetTypeName (handle));
+		}
+
+		[DllImport (Consts.NativeImport, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern int $(name:)_GetTypeStatic ();
+
+		private static StringHash GetTypeStatic ()
+		{
+			Runtime.Validate (typeof(Log));
+			return new StringHash ($(name:)_GetTypeStatic ());
+		}
+
+		[DllImport (Consts.NativeImport, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern IntPtr $(name:)_GetTypeNameStatic ();
+
+		private static string GetTypeNameStatic ()
+		{
+			Runtime.Validate (typeof(Log));
+			return Marshal.PtrToStringAnsi ($(name:)_GetTypeNameStatic ());
+		}
+
+		[Preserve]
+		public $(name:) () : this (Application.CurrentContext)
+		{
+		}
+
+		[DllImport (Consts.NativeImport, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern IntPtr $(name:)_$(name:) (IntPtr context);
+
+		[Preserve]
+		public $(name:) (Context context) : base (UrhoObjectFlag.Empty)
+		{
+			Runtime.Validate (typeof(Log));
+			handle = $(name:)_$(name:) ((object)context == null ? IntPtr.Zero : context.Handle);
+			Runtime.RegisterObject (this);
+			On$(name:)Created ();
+		}
+
+. for method where visibility?="public"
+		[DllImport (Consts.NativeImport, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern $(get_native_return_type(method)) $(component.name:)_$(name:) (IntPtr handle $(get_params(method,"0","0")) );
+
+		/// <summary>
+		/// $(get_tag_text(method))
+		/// </summary>        
+		public $(get_return_type(method)) $(name:) ($(get_params(method,"1","0")) )
+		{
+			Runtime.ValidateRefCounted (this);
+. if defined(method.return_type)
+.  if method.return_type="string"
+            return Marshal.PtrToStringAnsi ($(component.name:)_$(name:) (handle $(get_target_params(method)) ));
+.  else
+            return $(component.name:)_$(name:) (handle $(get_target_params(method,"0","0")) );
+.  endif
+. else
+                $(component.name:)_$(name:) (handle $(get_target_params(method,"0","0")) );
+. endif            
+		}
+. endfor
+
+
+. for field where visibility?="public"
+		[DllImport (Consts.NativeImport, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern $(get_native_type(type)) $(component.name:)_GET_$(name:) (IntPtr handle);
+
+		[DllImport (Consts.NativeImport, CallingConvention = CallingConvention.Cdecl)]
+		internal static extern void $(component.name:)_SET_$(name:) (IntPtr handle, $(get_field_setter_parameter(field))  );
+
+		public $(get_type_name(field.type)) $(Name) {
+			get{ return $(component.name:)_GET_$(name:)(handle);}
+			set{ $(component.name:)_SET_$(name:) (handle,value);}
+		}
+
+. endfor
+
+    }
+}
+.endtemplate
+.endfor
+
+
+
+
+
+
