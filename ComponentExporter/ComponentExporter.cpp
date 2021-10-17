@@ -1024,6 +1024,14 @@ JSONObject Urho3DNodeTreeExporter::ExportGlobalData(){
     }
     globalData["particles"] = particles;
 
+    JSONArray materials;
+    for (String name : materialFiles){
+        StringHash hash(name);
+        String id(hash.Value() % 10000000);
+        NodeAddEnumElement(materials,name,name,"Materials "+name,"OUTLINER_DATA_MESH",id);
+    }
+    globalData["materials"] = materials;
+
     return globalData;
 }
 
