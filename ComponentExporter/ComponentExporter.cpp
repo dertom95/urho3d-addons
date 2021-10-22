@@ -71,6 +71,7 @@ void Urho3DNodeTreeExporter::ProcessFileSystem()
     particleFiles.Clear();
     soundFiles.Clear();
     renderPathFiles.Clear();
+    particleFiles.Clear();
 
     for (String resDir : cache->GetResourceDirs()){
         Vector<String> dirFiles;
@@ -174,52 +175,53 @@ void Urho3DNodeTreeExporter::ProcessFileSystem()
                     break;
                 }
             }
+        }
 
-            for (String path : m_particleFolders){
-                String dir = resDir+path;
-                fs->ScanDir(dirFiles,dir,"*.xml",SCAN_FILES,true);
-                for (String foundParticle : dirFiles){
-                    auto particleResourceName = path+"/"+foundParticle;
-                    particleFiles.Push(particleResourceName);
-                }
-            }
-
-            for (String path : m_soundFolders){
-                String dir = resDir+path;
-                fs->ScanDir(dirFiles,dir,"*.ogg",SCAN_FILES,true);
-                for (String foundSound : dirFiles){
-                    auto soundResourceName = path+"/"+foundSound;
-                    soundFiles.Push(soundResourceName);
-                }
-            }
-
-            for (String path : m_soundFolders){
-                String dir = resDir+path;
-                fs->ScanDir(dirFiles,dir,"*.wav",SCAN_FILES,true);
-                for (String foundSound : dirFiles){
-                    auto soundResourceName = path+"/"+foundSound;
-                    soundFiles.Push(soundResourceName);
-                }
-            }
-
-            for (String path : m_sceneFolders){
-                String dir = resDir+path;
-                fs->ScanDir(dirFiles,dir,"*.xml",SCAN_FILES,true);
-                for (String foundScene : dirFiles){
-                    auto sceneResourceName = path+"/"+foundScene;
-                    sceneFiles.Push(sceneResourceName);
-                }
-            }
-
-            for (String path : m_objectFolders){
-                String dir = resDir+path;
-                fs->ScanDir(dirFiles,dir,"*.xml",SCAN_FILES,true);
-                for (String foundObject : dirFiles){
-                    auto objectResourceName = path+"/"+foundObject;
-                    objectFiles.Push(objectResourceName);
-                }
+        for (String path : m_particleFolders){
+            String dir = resDir+path;
+            fs->ScanDir(dirFiles,dir,"*.xml",SCAN_FILES,true);
+            for (String foundParticle : dirFiles){
+                auto particleResourceName = path+"/"+foundParticle;
+                particleFiles.Push(particleResourceName);
             }
         }
+
+        for (String path : m_soundFolders){
+            String dir = resDir+path;
+            fs->ScanDir(dirFiles,dir,"*.ogg",SCAN_FILES,true);
+            for (String foundSound : dirFiles){
+                auto soundResourceName = path+"/"+foundSound;
+                soundFiles.Push(soundResourceName);
+            }
+        }
+
+        for (String path : m_soundFolders){
+            String dir = resDir+path;
+            fs->ScanDir(dirFiles,dir,"*.wav",SCAN_FILES,true);
+            for (String foundSound : dirFiles){
+                auto soundResourceName = path+"/"+foundSound;
+                soundFiles.Push(soundResourceName);
+            }
+        }
+
+        for (String path : m_sceneFolders){
+            String dir = resDir+path;
+            fs->ScanDir(dirFiles,dir,"*.xml",SCAN_FILES,true);
+            for (String foundScene : dirFiles){
+                auto sceneResourceName = path+"/"+foundScene;
+                sceneFiles.Push(sceneResourceName);
+            }
+        }
+
+        for (String path : m_objectFolders){
+            String dir = resDir+path;
+            fs->ScanDir(dirFiles,dir,"*.xml",SCAN_FILES,true);
+            for (String foundObject : dirFiles){
+                auto objectResourceName = path+"/"+foundObject;
+                objectFiles.Push(objectResourceName);
+            }
+        }
+        
 
     }
 
@@ -233,6 +235,8 @@ void Urho3DNodeTreeExporter::ProcessFileSystem()
     Sort(soundFiles.Begin(),soundFiles.End(),CompareString);
     Sort(sceneFiles.Begin(),sceneFiles.End(),CompareString);
     Sort(objectFiles.Begin(),objectFiles.End(),CompareString);
+    Sort(particleFiles.Begin(),particleFiles.End(),CompareString);
+    
 
 }
 
