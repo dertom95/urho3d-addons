@@ -52,6 +52,8 @@ public:
     void AddSoundFolder(const String& folder);
     void AddSceneFolder(const String& folder);
     void AddObjectFolder(const String& folder);
+    void AddFontFolder(const String& folder);
+    void AddPostProcessFolder(const String& folder);
 
     inline void SetResourceCache(SharedPtr<ResourceCache> resCache) { m_resourceCache = resCache; }
     void Export(String filename,bool exportComponentTree=true,bool exportMaterialTree=true);
@@ -104,6 +106,8 @@ private:
     Vector<String> m_soundFolders;
     Vector<String> m_sceneFolders;
     Vector<String> m_objectFolders;
+    Vector<String> m_fontFolders;
+    Vector<String> m_postProcessFolders;
 
     Vector<String> m_customUIFilenames;
 
@@ -115,9 +119,11 @@ private:
     Vector<String> modelFiles;
     Vector<String> animationFiles;
     Vector<String> particleFiles;
+    Vector<String> fontFiles;
     Vector<String> soundFiles;
     Vector<String> objectFiles;
     Vector<String> sceneFiles;
+    Vector<String> postprocessFiles;
 
     SharedPtr<ResourceCache> m_resourceCache;
 };

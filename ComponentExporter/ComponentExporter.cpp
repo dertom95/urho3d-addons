@@ -71,7 +71,8 @@ void Urho3DNodeTreeExporter::ProcessFileSystem()
     particleFiles.Clear();
     soundFiles.Clear();
     renderPathFiles.Clear();
-    particleFiles.Clear();
+    fontFiles.Clear();
+    postprocessFiles.Clear();
 
     for (String resDir : cache->GetResourceDirs()){
         Vector<String> dirFiles;
@@ -185,6 +186,24 @@ void Urho3DNodeTreeExporter::ProcessFileSystem()
                 particleFiles.Push(particleResourceName);
             }
         }
+
+        for (String path : m_fontFolders){
+            String dir = resDir+path;
+            fs->ScanDir(dirFiles,dir,"*.ttf",SCAN_FILES,true);
+            for (String foundFont : dirFiles){
+                auto fontResourceName = path+"/"+foundFont;
+                fontFiles.Push(fontResourceName);
+            }
+        }   
+
+        for (String path : m_postProcessFolders){
+            String dir = resDir+path;
+            fs->ScanDir(dirFiles,dir,"*.xml",SCAN_FILES,true);
+            for (String foundPP : dirFiles){
+                auto ppResourceName = path+"/"+foundPP;
+                postprocessFiles.Push(ppResourceName);
+            }
+        }             
 
         for (String path : m_soundFolders){
             String dir = resDir+path;
@@ -627,6 +646,16 @@ void Urho3DNodeTreeExporter::AddObjectFolder(const String &folder)
     m_objectFolders.Push(folder);
 }
 
+void Urho3DNodeTreeExporter::AddPostProcessFolder(const String &folder)
+{
+    m_postProcessFolders.Push(folder);
+}
+
+void Urho3DNodeTreeExporter::AddFontFolder(const String &folder)
+{
+    m_fontFolders.Push(folder);
+}
+
 void Urho3DNodeTreeExporter::NodeAddSocket(JSONObject &node, const String &name, NodeSocketType type,bool isInputSocket)
 {
     String socketlistName = isInputSocket ? "inputsockets" : "outputsockets";
@@ -1035,6 +1064,22 @@ JSONObject Urho3DNodeTreeExporter::ExportGlobalData(){
         NodeAddEnumElement(materials,name,name,"Materials "+name,"OUTLINER_DATA_MESH",id);
     }
     globalData["materials"] = materials;
+
+    JSONArray fonts;
+    for (String name : fontFiles){
+        StringHash hash(name);
+        String id(hash.Value() % 10000000);
+        NodeAddEnumElement(fonts,name,name,"Font "+name,"OUTLINER_DATA_MESH",id);
+    }
+    globalData["fonts"] = fonts;
+
+    JSONArray postProcess;
+    for (String name : postprocessFiles){
+        StringHash hash(name);
+        String id(hash.Value() % 10000000);
+        NodeAddEnumElement(postProcess,name,name,"Postprocess "+name,"OUTLINER_DATA_MESH",id);
+    }
+    globalData["postprocess"] = postProcess;        
 
     return globalData;
 }
