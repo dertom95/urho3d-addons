@@ -26,8 +26,8 @@ void GroupInstance::SetGroupFilename(const String &groupFilename)
     Node groupRoot(context_);
     if (file){
         groupRoot.LoadXML(file->GetRoot());
-        for (auto child : groupRoot.GetChildren()){
-            node_->AddChild(child);
+        while (groupRoot.GetNumChildren()>0){
+            node_->AddChild(groupRoot.GetChild((unsigned)0));
         }
     } else {
         URHO3D_LOGERRORF("Could not load group-instance: %s",groupFilename.CString() );
