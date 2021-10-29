@@ -521,7 +521,7 @@ void Urho3DNodeTreeExporter::NodeAddProp(JSONObject &node, const String &name, N
     JSONObject prop;
     prop["name"]=name;
 
-    if (type>=NT_VECTOR2 && type<=NT_COLOR){
+    if (type>=NT_VECTOR2 && type<=NT_INTVECTOR3){
         prop["default"]="("+defaultValue.Replaced(" ",",")+")";
     } else {
         prop["default"]=defaultValue;
@@ -536,6 +536,8 @@ void Urho3DNodeTreeExporter::NodeAddProp(JSONObject &node, const String &name, N
         case NT_VECTOR4: prop["type"] = "vector4"; break;
         case NT_COLOR: prop["type"] = "color"; break;
         case NT_STRING: prop["type"] = "string"; break;
+        case NT_INTVECTOR2 : prop["type"] = "intvector2"; break;
+        case NT_INTVECTOR3 : prop["type"] = "intvector3"; break;
         default:  URHO3D_LOGERRORF("AddProp(%s): Unknown TYPE with int-value:%i",name.CString(),(int)type);
     }
     switch (subType){
@@ -814,6 +816,10 @@ JSONObject Urho3DNodeTreeExporter::ExportComponents()
                         NodeAddProp(node, attr.name_,NT_VECTOR3,attr.defaultValue_.ToString());break;
                     case VAR_VECTOR4 :
                         NodeAddProp(node, attr.name_,NT_VECTOR4,attr.defaultValue_.ToString());break;
+                    case VAR_INTVECTOR2 : 
+                        NodeAddProp(node, attr.name_,NT_INTVECTOR2,attr.defaultValue_.ToString());break;
+                    case VAR_INTVECTOR3 : 
+                        NodeAddProp(node, attr.name_,NT_INTVECTOR3,attr.defaultValue_.ToString());break;
 
                     case VAR_RESOURCEREF :
                         prop["type"]="string";
@@ -939,6 +945,21 @@ JSONObject Urho3DNodeTreeExporter::ExportComponents()
 
                                 NodeAddPropEnum(node,attr.name_,enumElems,true,"0");
                                 alreadyAdded = true;
+                            }
+                            else if (typeName == "Font") {
+                                // dropdown to choose techniques available from the resource-path
+                                JSONArray enumElems;
+                                NodeAddEnumElement(enumElems,"none","None","No Sound","FILE_FONT");
+                                for (String name : fontFiles){
+                                    StringHash hash(name);
+                                    String id(hash.Value() % 10000000);
+                                    NodeAddEnumElement(enumElems,"Font;"+name,name,"Font "+name,"FILE_FONT",id);
+                                }
+                                NodeAddPropEnum(node,attr.name_,enumElems,true,"0");
+                                alreadyAdded = true;                                
+                            }
+                            else {
+                                URHO3D_LOGINFOF("[%s] Unknown ResourceRef:%s [%s]",typeName.CString(),val->GetTypeName().CString());
                             }
 
                         }
