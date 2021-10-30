@@ -878,6 +878,23 @@ JSONObject Urho3DNodeTreeExporter::ExportComponents()
                                 alreadyAdded = true;
 
                             }
+                            else if (typeName == "Image")
+                            {
+                                // dropdown to choose textures available from the resource-path
+                                JSONArray enumElems;
+                                NodeAddEnumElement(enumElems,"none","None","No Texture","TEXTURE");
+
+                                for (TextureExportPath tex : textureFiles){
+                                    StringHash hash(tex.resFilepath);
+                                    String id(hash.Value() % 10000000);
+
+                                    NodeAddEnumElement(enumElems,"Image;"+tex.resFilepath,tex.resFilepath,tex.absFilepath,"TEXTURE",id);
+                                }
+
+                                NodeAddPropEnum(node,attr.name_,enumElems,true,"0");
+                                alreadyAdded = true;
+
+                            }                            
                             else if (typeName == "TextureCube")
                             {
                                 // dropdown to choose textures available from the resource-path
